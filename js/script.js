@@ -54,7 +54,7 @@ function calgps() {
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   var EARTH_R, Rad, radLat1, radLat2, radDist;
   var distance, ret;
-  EARTH_R = 6371000.0;
+  EARTH_R = 6371.0; // Earth's radius in kilometers
   Rad = Math.PI / 180;
   radLat1 = Rad * lat1;
   radLat2 = Rad * lat2;
@@ -63,10 +63,5 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
   distance =
     distance + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radDist);
   ret = EARTH_R * Math.acos(distance);
-  var rtn = Math.round(Math.round(ret) / 1000);
-  rtn =
-    Math.round(ret)
-      .toString()
-      .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") + " m";
-  return rtn;
+  return ret.toFixed(2) + " km"; // Return distance in kilometers with 2 decimal places
 }
