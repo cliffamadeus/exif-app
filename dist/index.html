@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Calculate Distance between two photos</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<html>
+
+<head>
+  <meta charset="UTF-8">
+</head>
+Only Select two exif(gps) photos & Calculate distance between two photos
+<br /><br /><br /><br />
+<div width=500px>
+  <div style='float:left;'>
+    <img id='img1' src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
+    <pre>Latitude: <span id="gps1la"></span></pre>
+    <pre>Longitude: <span id="gps1lo"></span></pre>
+    <input type='file' id="imginput1" onchange='javascript:imginput1(this);' />
+  </div>
+  <div style='float:left;'>
+    <img id='img2' src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
+    <pre>Latitude: <span id="gps2la"></span></pre>
+    <pre>Longitude: <span id="gps2lo"></span></pre>
+    <input type='file' id="imginput2" onchange='javascript:imginput2(this);' />
+  </div>
+</div>
+
+<div id="calgps"> </div>
+<button onclick='javascript:calgps();'>Distance Calculate</button>
+
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
