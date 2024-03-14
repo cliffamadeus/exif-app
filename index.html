@@ -29,7 +29,7 @@
                 <h5 id="calgps"></h5>
               </ion-col>
               <ion-col>
-                <button type="button" class="btn btn-primary" onclick='javascript:calgps();'>Calculate Distance </button>
+                <button type="button" class="btn btn-primary " onclick='javascript:calgps();'>Calculate Distance </button>
               </ion-col>
             </ion-row>
           </ion-grid>
@@ -37,45 +37,34 @@
       </div>
     </div>
 
-    <!--Image 1-->
-    <div class="card">
-      <ion-grid>
-        <ion-row>
-          <ion-col size="3">
-            <img id='img1' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
-          </ion-col>
-          <ion-col size="4">
-            <h5 class="card-title" >Image 1</h5>
+    <!--Integrated-->
+
+    <ion-grid>
+      <ion-row>
+        <ion-col> <img id='img1' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px> </ion-col>
+        <ion-col>
+          <h5 class="card-title" >Image 1</h5>
             <br>
             <input text-truncate type='file' id="imginput1" onchange='javascript:imginput1(this);' />
               <p class="card-text">
                 <pre>Latitude: <span id="gps1la"></span></pre>
                 <pre>Longitude: <span id="gps1lo"></span></pre>
               </p>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
+        </ion-col>
 
-    <!--Image 2-->
-    <div class="card">
-      <ion-grid>
-        <ion-row>
-          <ion-col size="3">
-            <img id='img2' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
-          </ion-col>
-          <ion-col size="4">
-            <h5 class="card-title" >Image 2</h5>
+
+        <ion-col><img id='img1' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px></ion-col>
+        <ion-col>
+          <h5 class="card-title" >Image 2</h5>
             <br>
             <input text-truncate type='file' id="imginput2" onchange='javascript:imginput2(this);' />
-            <p class="card-text">
-              <pre>Latitude: <span id="gps2la"></span></pre>
-              <pre>Longitude: <span id="gps2lo"></span></pre>
-            </p>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
+              <p class="card-text">
+                <pre>Latitude: <span id="gps1la"></span></pre>
+                <pre>Longitude: <span id="gps1lo"></span></pre>
+              </p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 
   </ion-content>
   
