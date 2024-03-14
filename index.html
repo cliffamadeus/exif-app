@@ -13,42 +13,72 @@
 </head>
 <body>
 <html>
-<div class="container-fluid text-center">
-  <div class="row">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Calculate Distance between two photos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="ion-padding">
+    <!--Compute Box-->
     <div class="col">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Calculate Distance between two photos</h5>
-          <h5 id="calgps"></h5>
-          <div ></div>
-          <button type="button" class="btn btn-primary" onclick='javascript:calgps();'>Calculate Distance </button>
+          <ion-grid>
+            <ion-row>
+              <ion-col>
+                <h5 id="calgps"></h5>
+              </ion-col>
+              <ion-col>
+                <button type="button" class="btn btn-primary" onclick='javascript:calgps();'>Calculate Distance </button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </div>
-
       </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-sm">
-      <img id='img1' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
-      <h5 class="card-title">Image 1</h5>
-      <p class="card-text">
-        <pre>Latitude: <span id="gps1la"></span></pre>
-        <pre>Longitude: <span id="gps1lo"></span></pre>
-      </p>
-      <input text-truncate type='file' id="imginput1" onchange='javascript:imginput1(this);' />
 
+    <!--Image 1-->
+    <div class="card">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="3">
+            <img id='img1' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
+          </ion-col>
+          <ion-col size="4">
+            <h5 class="card-title" >Image 1</h5>
+            <br>
+            <input text-truncate type='file' id="imginput1" onchange='javascript:imginput1(this);' />
+              <p class="card-text">
+                <pre>Latitude: <span id="gps1la"></span></pre>
+                <pre>Longitude: <span id="gps1lo"></span></pre>
+              </p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </div>
-    <div class="col-sm">
-      <img id='img2' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
-        <h5 class="card-title">Image 2</h5>
-        <p class="card-text">
-          <pre>Latitude: <span id="gps2la"></span></pre>
-          <pre>Longitude: <span id="gps2lo"></span></pre>
-        </p>
-        <input text-truncate type='file' id="imginput2" onchange='javascript:imginput2(this);' />
-    </div> 
-  </div>
-</div>
+
+    <!--Image 2-->
+    <div class="card">
+      <ion-grid>
+        <ion-row>
+          <ion-col size="3">
+            <img id='img2' class="img-fluid" src='https://www.freeiconspng.com/uploads/no-image-icon-6.png' width=200px>
+          </ion-col>
+          <ion-col size="4">
+            <h5 class="card-title" >Image 2</h5>
+            <br>
+            <input text-truncate type='file' id="imginput2" onchange='javascript:imginput2(this);' />
+            <p class="card-text">
+              <pre>Latitude: <span id="gps2la"></span></pre>
+              <pre>Longitude: <span id="gps2lo"></span></pre>
+            </p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+  </ion-content>
+  
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script  src="./js/script.js"></script>
 </body>
