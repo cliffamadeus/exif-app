@@ -71,6 +71,17 @@
         <ion-icon name="add"></ion-icon>
       </ion-fab-button>
     </ion-fab>
+    <ion-alert
+      trigger="present-alert"
+      header="About"
+      sub-header="This application was developed by Cliffmeister"
+      message=""
+    ></ion-alert>
+
+    <script>
+      const alert = document.querySelector('ion-alert');
+      alert.buttons = ['Action'];
+    </script>
 
   </ion-content>
   
