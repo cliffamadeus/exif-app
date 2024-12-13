@@ -1,0 +1,18 @@
+[
+    {
+      "title": "Applet 1 - EXIF Basic",
+      "description": "",
+      "link": "./exif-basic.html"
+    },
+    {
+      "title": "Applet 2 - EXIF Distance Calculator",
+      "description": "UI Library: Ionic",
+      "link": "./distance-calculator.html"
+    }
+    ,
+    {
+      "title": "Applet 3 - EXIF Distance Calculator",
+      "description": "",
+      "link": "./exif-openweather.html"
+    }
+]
