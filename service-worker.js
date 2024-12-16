@@ -1,51 +1,70 @@
-const CACHE_NAME = 'exif-plotter-cache-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
-  'https://cdn.jsdelivr.net/npm/exif-js',
-  'https://unpkg.com/leaflet/dist/leaflet.css',
-  'https://unpkg.com/leaflet/dist/leaflet.js'
+// service-worker.js
+
+// Define the cache name
+const CACHE_NAME = 'weather-exif-cache-v1';
+const CACHE_URLS = [
+    '/',
+    '/index.html',
+    '/styles.css',  // Add your CSS file
+    '/script.js',    // Add your JavaScript file
+    '/images/placeholder.png', // Add any placeholder images
+    '/images/weather-icons/',  // Add weather icons if needed
+    'https://openweathermap.org/img/wn/',  // If you want to cache the weather icons
+    // Add any other resources you want to cache here
 ];
 
-// Install event
+// Install the service worker and cache necessary files
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then((cache) => {
+                return cache.addAll(CACHE_URLS);
+            })
+            .catch((error) => {
+                console.error('Failed to cache assets during service worker install:', error);
+            })
+    );
 });
 
-// Activate event
+// Activate the service worker and clean up old caches
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (!cacheWhitelist.includes(cacheName)) {
-            return caches.delete(cacheName);
-          }
+    const cacheWhitelist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (!cacheWhitelist.includes(cacheName)) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
         })
-      );
-    })
-  );
+    );
 });
 
-// Fetch event - serve from cache if offline
+// Intercept fetch requests and return cached assets if available
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // Return cached response if available, else fetch from network
-        return cachedResponse || fetch(event.request);
-      })
-  );
+    // Handle all fetch requests and try to serve from cache first
+    event.respondWith(
+        caches.match(event.request)
+            .then((cachedResponse) => {
+                if (cachedResponse) {
+                    // Return cached response if available
+                    return cachedResponse;
+                }
+                
+                // Otherwise, fetch from network and cache the response
+                return fetch(event.request).then((networkResponse) => {
+                    if (event.request.url.startsWith('http')) {
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, networkResponse.clone());
+                        });
+                    }
+                    return networkResponse;
+                });
+            })
+            .catch((error) => {
+                console.error('Failed to fetch:', error);
+            })
+    );
 });
