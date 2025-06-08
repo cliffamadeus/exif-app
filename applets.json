@@ -8,11 +8,15 @@
       "title": "Applet 2 - EXIF Distance Calculator",
       "description": "UI Library: Ionic",
       "link": "./distance-calculator.html"
-    }
-    ,
+    },
     {
       "title": "Applet 3 - EXIF Distance Calculator",
       "description": "",
       "link": "./exif-openweather.html"
+    },
+    {
+      "title": "Applet 4 - AI Detector",
+      "description": "",
+      "link": "./ai-exif.html"
     }
 ]
