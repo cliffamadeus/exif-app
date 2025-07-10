@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXIF Photo Plotter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        .main {
+            width: 95%;
+            margin-left: 3%;
+            justify-content: center;
+        }
+        .image-preview {
+            width: 200px;
+        }
+        .image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        #photoCards {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .photo-card {
+            cursor: pointer;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .photo-card:hover {
+            background-color: #f8f9fa;
+        }
+        .photo-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 3px;
+        }
+        .photo-card.active {
+            background-color: #e9f7fe;
+            border-color: #86b7fe;
+        }
+        .path-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        #map {
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="main" style="margin-top: .25rem;">
+    <div class="card mb-4">
+        <div class="card-header text-bg-light">
+            <h5 class="card-title mb-0">EXIF Photo Plotter</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <!-- Image and Input Section -->
+                <div class="col-md-4 image-section">
+                    <img id="imagePreview" class="image-preview" src="https://www.freeiconspng.com/uploads/no-image-icon-6.png" alt="Image Preview" />
+                    <input type="file" id="imageInput" style="margin-top:15px;" class="form-control" multiple accept="image/*" onchange="handleImageInput(this);" />
+                    <div class="text-center mt-3">
+                        <small id="dateTimeData">No date data</small>
+                    </div>
+                    <button id="clearButton" class="btn btn-danger mt-3" type="button" onclick="clearMap()">Clear Map</button>
+                    <div id="pathInfo" class="path-info mt-3" style="display: none;">
+                        <strong>Total Distance:</strong> <span id="totalDistance">0 km</span>
+                    </div>
+                </div>
+
+                <!-- Data Section (EXIF & Weather) -->
+                <div class="col-md-8 data-section">
+                    <div class="row">
+                        <!-- EXIF Data Column -->
+                        <div class="col">
+                            <div class="row">
+                                <div class="col">
+                                    <input type="hidden" id="latitudeData" value="No GPS data">
+                                </div>
+                                <div class="col">
+                                    <input type="hidden" id="longitudeData" value="No GPS data">
+                                </div>
+                            </div>
+                            
+                            <h5>Photo Information</h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col">
+                                    <strong>Approximate Location</strong>
+                                    <p id="locData">No location data</p>
+                                </div>
+                                <div class="col">
+                                    <strong>Altitude (masl):</strong>
+                                    <p id="altitudeData">No altitude data</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <strong>Temperature:</strong>
+                                    <p id="tempData">No temperature data</p>
+                                    <div class="col">
+                                    <strong>Humidity</strong>
+                                    <p id="humData">No humidity data</p>
+                                    </div>
+                                    <div class="col">
+                                        <strong>Wind Speed</strong>
+                                        <p id="wind_speedData">No wind speed data</p>
+                                    </div>
+                                </div>
+                                <div class="col" style="justify-content: center;">
+                                    <img id="weatherIcon" src="https://play-lh.googleusercontent.com/-8wkZVkXugyyke6sDPUP5xHKQMzK7Ub3ms2EK9Jr00uhf1fiMhLbqX7K9SdoxbAuhQ" alt="" style="width: 150px; height: 150px;" />
+                                    <h4 id="weatherData">No weather data</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo Cards Section -->
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h5>Photo Gallery</h5>
+                    <div id="photoCards" class="row row-cols-1 row-cols-md-3 g-4"></div>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div id="map" class="mt-4"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables
+    const myMap = L.map('map').setView([11.635230398105993, 123.70790316297406], 5);
+    let markers = [];
+    let photoData = [];
+    let pathPolyline = null;
+    let totalDistance = 0;
+
+    // Initialize map
+    function initMap() {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | EXIF Photo Plotter'
+        }).addTo(myMap);
+        
+        console.log('Map initialized successfully');
+    }
+
+    // Handle image input and extract EXIF data
+    async function handleImageInput(input) {
+        if (!input.files || input.files.length === 0) {
+            console.error('No files selected');
+            return;
+        }
+
+        // Clear previous data if it's not a multiple file addition
+        if (input.files.length > 1) {
+            clearMap(false); // Clear map but keep console logs
+        }
+
+        // Process each file
+        for (let i = 0; i < input.files.length; i++) {
+            const file = input.files[i];
+            await processImageFile(file);
+        }
+
+        // Update the photo cards and draw paths
+        updatePhotoCards();
+        drawPaths();
+    }
+
+    // Process a single image file
+    async function processImageFile(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                EXIF.getData(file, function() {
+                    try {
+                        const lat = EXIF.getTag(this, "GPSLatitude");
+                        const lon = EXIF.getTag(this, "GPSLongitude");
+                        const date = EXIF.getTag(this, "DateTimeOriginal");
+                        const altitude = EXIF.getTag(this, "GPSAltitude");
+                        const make = EXIF.getTag(this, "Make");
+                        const model = EXIF.getTag(this, "Model");
+
+                        if (!lat || !lon) {
+                            console.warn(`Skipping ${file.name} - No GPS data found`);
+                            resolve();
+                            return;
+                        }
+
+                        const latRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
+                        const lonRef = EXIF.getTag(this, "GPSLongitudeRef") || "W";
+                        const calculatedLat = (lat[0] + lat[1] / 60 + lat[2] / 3600) * (latRef === "N" ? 1 : -1);
+                        const calculatedLon = (lon[0] + lon[1] / 60 + lon[2] / 3600) * (lonRef === "W" ? -1 : 1);
+
+                        // Create photo data object
+                        const photo = {
+                            id: Date.now() + Math.random().toString(36).substr(2, 9),
+                            file: file,
+                            src: e.target.result,
+                            lat: calculatedLat,
+                            lon: calculatedLon,
+                            date: date ? formatDate(date) : 'Unknown date',
+                            altitude: altitude || 'Unknown altitude',
+                            make: make || 'Unknown make',
+                            model: model || 'Unknown model',
+                            filename: file.name
+                        };
+
+                        // Add to photo data array
+                        photoData.push(photo);
+                        console.log(`Added photo pin for ${file.name} at ${calculatedLat}, ${calculatedLon}`);
+
+                        // Display the first photo's details
+                        if (photoData.length === 1) {
+                            displayPhotoDetails(photo);
+                        }
+
+                        resolve();
+                    } catch (error) {
+                        console.error(`Error processing ${file.name}:`, error);
+                        resolve();
+                    }
+                });
+            };
+            
+            reader.onerror = function() {
+                console.error(`Error reading file ${file.name}`);
+                resolve();
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Display photo details in the info panel
+    function displayPhotoDetails(photo) {
+        document.getElementById("imagePreview").src = photo.src;
+        document.getElementById("latitudeData").textContent = photo.lat;
+        document.getElementById("longitudeData").textContent = photo.lon;
+        document.getElementById("dateTimeData").textContent = photo.date;
+        document.getElementById("altitudeData").textContent = photo.altitude;
+        
+        // Fetch weather for this location
+        fetchWeatherData(photo.lat, photo.lon);
+    }
+
+    // Update photo cards in the gallery
+    function updatePhotoCards() {
+        const cardsContainer = document.getElementById("photoCards");
+        cardsContainer.innerHTML = '';
+
+        photoData.forEach(photo => {
+            const card = document.createElement('div');
+            card.className = 'col photo-card';
+            card.innerHTML = `
+                <div class="card h-100" onclick="focusOnPhoto('${photo.id}')">
+                    <img src="${photo.src}" class="card-img-top" alt="${photo.filename}">
+                    <div class="card-body">
+                        <h6 class="card-title">${photo.filename}</h6>
+                        <p class="card-text small">
+                            <strong>Date:</strong> ${photo.date}<br>
+                            <strong>Location:</strong> ${photo.lat.toFixed(6)}, ${photo.lon.toFixed(6)}
+                        </p>
+                    </div>
+                </div>
+            `;
+            cardsContainer.appendChild(card);
+        });
+    }
+
+    // Focus on a specific photo on the map
+    function focusOnPhoto(photoId) {
+        const photo = photoData.find(p => p.id === photoId);
+        if (!photo) return;
+
+        // Highlight the card
+        document.querySelectorAll('.photo-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+
+        // Center map on photo
+        myMap.setView([photo.lat, photo.lon], 15);
+
+        // Open popup for the marker
+        const marker = markers.find(m => m.photoId === photoId);
+        if (marker) {
+            marker.openPopup();
+        }
+
+        // Display photo details
+        displayPhotoDetails(photo);
+    }
+
+    // Draw paths between photo locations
+    function drawPaths() {
+        // Clear existing markers and path
+        markers.forEach(marker => myMap.removeLayer(marker));
+        markers = [];
+        
+        if (pathPolyline) {
+            myMap.removeLayer(pathPolyline);
+        }
+
+        if (photoData.length === 0) {
+            document.getElementById("pathInfo").style.display = 'none';
+            return;
+        }
+
+        // Sort photos by date if available
+        const sortedPhotos = [...photoData].sort((a, b) => {
+            return new Date(a.date) - new Date(b.date);
+        });
+
+        // Add markers for each photo
+        sortedPhotos.forEach(photo => {
+            const marker = L.marker([photo.lat, photo.lon])
+                .addTo(myMap)
+                .bindPopup(`
+                    <b>${photo.filename}</b><br>
+                    <b>Date:</b> ${photo.date}<br>
+                    <b>Coordinates:</b> ${photo.lat.toFixed(6)}, ${photo.lon.toFixed(6)}<br>
+                    <b>Altitude:</b> ${photo.altitude}<br>
+                    <b>Camera:</b> ${photo.make} ${photo.model}<br>
+                    <img src="${photo.src}" style="max-width: 200px; max-height: 200px;">
+                `);
+            
+            // Store reference to the photo
+            marker.photoId = photo.id;
+            markers.push(marker);
+        });
+
+        // Create path coordinates
+        const pathCoords = sortedPhotos.map(photo => [photo.lat, photo.lon]);
+
+        // Draw polyline
+        pathPolyline = L.polyline(pathCoords, {color: 'blue'}).addTo(myMap);
+
+        // Calculate total distance
+        totalDistance = calculateTotalDistance(pathCoords);
+        document.getElementById("totalDistance").textContent = `${totalDistance.toFixed(2)} km`;
+        document.getElementById("pathInfo").style.display = 'block';
+
+        // Fit map to bounds
+        myMap.fitBounds(pathPolyline.getBounds(), {padding: [50, 50]});
+
+        console.log(`Path drawing completed with ${sortedPhotos.length} points. Total distance: ${totalDistance.toFixed(2)} km`);
+    }
+
+    // Calculate total distance between points (in km)
+    function calculateTotalDistance(coords) {
+        let distance = 0;
+        
+        for (let i = 1; i < coords.length; i++) {
+            const prev = coords[i-1];
+            const curr = coords[i];
+            distance += calculateDistance(prev[0], prev[1], curr[0], curr[1]);
+        }
+        
+        return distance;
+    }
+
+    // Calculate distance between two coordinates (Haversine formula)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // Clear the map and reset all data
+    function clearMap(resetInput = true) {
+        // Clear markers and path
+        markers.forEach(marker => myMap.removeLayer(marker));
+        markers = [];
+        
+        if (pathPolyline) {
+            myMap.removeLayer(pathPolyline);
+            pathPolyline = null;
+        }
+
+        // Clear photo data
+        photoData = [];
+        totalDistance = 0;
+        
+        // Reset UI elements
+        document.getElementById("photoCards").innerHTML = '';
+        document.getElementById("pathInfo").style.display = 'none';
+        
+        if (resetInput) {
+            document.getElementById("imageInput").value = '';
+        }
+        
+        // Reset map view
+        myMap.setView([11.635230398105993, 123.70790316297406], 5);
+        
+        console.log('Map cleared successfully');
+    }
+
+    // Helper function to format the EXIF date string
+    function formatDate(date) {
+        if (!date) return 'Unknown date';
+        
+        try {
+            const dateParts = date.split(" "); 
+            const dateFormatted = dateParts[0].replace(/:/g, '-'); 
+            const timeFormatted = dateParts[1];
+
+            const isoFormattedDate = `${dateFormatted}T${timeFormatted}`;
+            const formattedDate = new Date(isoFormattedDate);
+
+            if (isNaN(formattedDate.getTime())) {
+                return date; // Return original if can't parse
+            } else {
+                return formattedDate.toLocaleString('en-US', {
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric', 
+                    hour: 'numeric', 
+                    minute: 'numeric', 
+                    second: 'numeric', 
+                    hour12: true 
+                });
+            }
+        } catch (e) {
+            console.error('Error formatting date:', e);
+            return date; // Return original if error
+        }
+    }
+
+    // Fetch weather data for coordinates
+    async function fetchWeatherData(lat, lon) {
+        const apiKey = 'b32786b808e33a9e3d7051cd1a10ad6f';
+        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data.cod === 200) {
+                const weatherDescription = capitalizeWords(data.weather[0].description);
+                const temperature = data.main.temp;
+                const humidity = data.main.humidity;
+                const windSpeed = data.wind.speed;
+                const locName = data.name;
+                const iconCode = data.weather[0].icon;
+
+                // Update weather info
+                document.getElementById("locData").textContent = locName || 'Unknown location';
+                document.getElementById("tempData").textContent = `${temperature} °C`;
+                document.getElementById("weatherData").textContent = weatherDescription;
+                document.getElementById("humData").textContent = `${humidity}%`;
+                document.getElementById("wind_speedData").textContent = `${windSpeed} m/s`;
+
+                // Set weather icon
+                const weatherIconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+                document.getElementById("weatherIcon").src = weatherIconUrl;
+            } else {
+                console.error('Weather API error:', data.message);
+                document.getElementById("weatherData").textContent = 'Weather data unavailable';
+            }
+        } catch (error) {
+            console.error('Error fetching weather data:', error);
+            document.getElementById("weatherData").textContent = 'Error fetching weather';
+        }
+    }
+
+    // Helper to capitalize words
+    function capitalizeWords(str) {
+        return str.split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+        console.log('EXIF Photo Plotter initialized');
+    });
+</script>
+</body>
+</html>
