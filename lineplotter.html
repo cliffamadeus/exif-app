@@ -62,6 +62,12 @@
         #map {
             height: 500px;
         }
+        .time-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
@@ -85,19 +91,23 @@
                     <div id="pathInfo" class="path-info mt-3" style="display: none;">
                         <strong>Total Distance:</strong> <span id="totalDistance">0 km</span>
                     </div>
+                    <div id="timeInfo" class="time-info mt-3" style="display: none;">
+                        <strong>Time Between Photos:</strong> <span id="timeDifference">N/A</span>
+                    </div>
                 </div>
 
-                <!-- Data Section (EXIF & Weather) -->
+                <!-- Data Section -->
                 <div class="col-md-8 data-section">
                     <div class="row">
-                        <!-- EXIF Data Column -->
                         <div class="col">
                             <div class="row">
                                 <div class="col">
-                                    <input type="hidden" id="latitudeData" value="No GPS data">
+                                    <strong>Latitude:</strong>
+                                    <p id="latitudeData">No GPS data</p>
                                 </div>
                                 <div class="col">
-                                    <input type="hidden" id="longitudeData" value="No GPS data">
+                                    <strong>Longitude:</strong>
+                                    <p id="longitudeData">No GPS data</p>
                                 </div>
                             </div>
                             
@@ -105,30 +115,22 @@
                             <hr>
                             <div class="row">
                                 <div class="col">
-                                    <strong>Approximate Location</strong>
-                                    <p id="locData">No location data</p>
+                                    <strong>Filename:</strong>
+                                    <p id="filenameData">No file selected</p>
                                 </div>
                                 <div class="col">
-                                    <strong>Altitude (masl):</strong>
-                                    <p id="altitudeData">No altitude data</p>
+                                    <strong>Date Taken:</strong>
+                                    <p id="dateData">No date data</p>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <strong>Temperature:</strong>
-                                    <p id="tempData">No temperature data</p>
-                                    <div class="col">
-                                    <strong>Humidity</strong>
-                                    <p id="humData">No humidity data</p>
-                                    </div>
-                                    <div class="col">
-                                        <strong>Wind Speed</strong>
-                                        <p id="wind_speedData">No wind speed data</p>
-                                    </div>
+                                    <strong>Camera Make:</strong>
+                                    <p id="makeData">No make data</p>
                                 </div>
-                                <div class="col" style="justify-content: center;">
-                                    <img id="weatherIcon" src="https://play-lh.googleusercontent.com/-8wkZVkXugyyke6sDPUP5xHKQMzK7Ub3ms2EK9Jr00uhf1fiMhLbqX7K9SdoxbAuhQ" alt="" style="width: 150px; height: 150px;" />
-                                    <h4 id="weatherData">No weather data</h4>
+                                <div class="col">
+                                    <strong>Camera Model:</strong>
+                                    <p id="modelData">No model data</p>
                                 </div>
                             </div>
                         </div>
@@ -189,6 +191,7 @@
         // Update the photo cards and draw paths
         updatePhotoCards();
         drawPaths();
+        updateTimeDifferences();
     }
 
     // Process a single image file
@@ -202,7 +205,6 @@
                         const lat = EXIF.getTag(this, "GPSLatitude");
                         const lon = EXIF.getTag(this, "GPSLongitude");
                         const date = EXIF.getTag(this, "DateTimeOriginal");
-                        const altitude = EXIF.getTag(this, "GPSAltitude");
                         const make = EXIF.getTag(this, "Make");
                         const model = EXIF.getTag(this, "Model");
 
@@ -217,6 +219,21 @@
                         const calculatedLat = (lat[0] + lat[1] / 60 + lat[2] / 3600) * (latRef === "N" ? 1 : -1);
                         const calculatedLon = (lon[0] + lon[1] / 60 + lon[2] / 3600) * (lonRef === "W" ? -1 : 1);
 
+                        // Parse date
+                        let dateObj = null;
+                        let formattedDate = 'Unknown date';
+                        if (date) {
+                            try {
+                                const dateParts = date.split(' ');
+                                const dateStr = dateParts[0].replace(/:/g, '-') + 'T' + dateParts[1];
+                                dateObj = new Date(dateStr);
+                                formattedDate = dateObj.toLocaleString();
+                            } catch (e) {
+                                console.error('Error parsing date:', e);
+                                formattedDate = date; // Use original string if parsing fails
+                            }
+                        }
+
                         // Create photo data object
                         const photo = {
                             id: Date.now() + Math.random().toString(36).substr(2, 9),
@@ -224,8 +241,9 @@
                             src: e.target.result,
                             lat: calculatedLat,
                             lon: calculatedLon,
-                            date: date ? formatDate(date) : 'Unknown date',
-                            altitude: altitude || 'Unknown altitude',
+                            date: date,
+                            dateObj: dateObj,
+                            formattedDate: formattedDate,
                             make: make || 'Unknown make',
                             model: model || 'Unknown model',
                             filename: file.name
@@ -260,13 +278,13 @@
     // Display photo details in the info panel
     function displayPhotoDetails(photo) {
         document.getElementById("imagePreview").src = photo.src;
-        document.getElementById("latitudeData").textContent = photo.lat;
-        document.getElementById("longitudeData").textContent = photo.lon;
-        document.getElementById("dateTimeData").textContent = photo.date;
-        document.getElementById("altitudeData").textContent = photo.altitude;
-        
-        // Fetch weather for this location
-        fetchWeatherData(photo.lat, photo.lon);
+        document.getElementById("latitudeData").textContent = photo.lat.toFixed(6);
+        document.getElementById("longitudeData").textContent = photo.lon.toFixed(6);
+        document.getElementById("dateTimeData").textContent = photo.formattedDate;
+        document.getElementById("dateData").textContent = photo.formattedDate;
+        document.getElementById("filenameData").textContent = photo.filename;
+        document.getElementById("makeData").textContent = photo.make;
+        document.getElementById("modelData").textContent = photo.model;
     }
 
     // Update photo cards in the gallery
@@ -283,7 +301,7 @@
                     <div class="card-body">
                         <h6 class="card-title">${photo.filename}</h6>
                         <p class="card-text small">
-                            <strong>Date:</strong> ${photo.date}<br>
+                            <strong>Date:</strong> ${photo.formattedDate}<br>
                             <strong>Location:</strong> ${photo.lat.toFixed(6)}, ${photo.lon.toFixed(6)}
                         </p>
                     </div>
@@ -334,7 +352,10 @@
 
         // Sort photos by date if available
         const sortedPhotos = [...photoData].sort((a, b) => {
-            return new Date(a.date) - new Date(b.date);
+            if (a.dateObj && b.dateObj) {
+                return a.dateObj - b.dateObj;
+            }
+            return 0;
         });
 
         // Add markers for each photo
@@ -343,9 +364,8 @@
                 .addTo(myMap)
                 .bindPopup(`
                     <b>${photo.filename}</b><br>
-                    <b>Date:</b> ${photo.date}<br>
+                    <b>Date:</b> ${photo.formattedDate}<br>
                     <b>Coordinates:</b> ${photo.lat.toFixed(6)}, ${photo.lon.toFixed(6)}<br>
-                    <b>Altitude:</b> ${photo.altitude}<br>
                     <b>Camera:</b> ${photo.make} ${photo.model}<br>
                     <img src="${photo.src}" style="max-width: 200px; max-height: 200px;">
                 `);
@@ -398,6 +418,58 @@
         return R * c;
     }
 
+    // Update time differences between photos
+    function updateTimeDifferences() {
+        if (photoData.length < 2) {
+            document.getElementById("timeInfo").style.display = 'none';
+            return;
+        }
+
+        // Sort photos by date
+        const sortedPhotos = [...photoData].filter(p => p.dateObj).sort((a, b) => a.dateObj - b.dateObj);
+        
+        if (sortedPhotos.length < 2) {
+            document.getElementById("timeInfo").style.display = 'none';
+            return;
+        }
+
+        // Calculate total time difference
+        const firstDate = sortedPhotos[0].dateObj;
+        const lastDate = sortedPhotos[sortedPhotos.length - 1].dateObj;
+        const totalTimeDiff = formatTimeDifference(firstDate, lastDate);
+
+        // Calculate time between consecutive photos
+        let timeDiffs = [];
+        for (let i = 1; i < sortedPhotos.length; i++) {
+            const diff = formatTimeDifference(sortedPhotos[i-1].dateObj, sortedPhotos[i].dateObj);
+            timeDiffs.push(diff);
+        }
+
+        // Display time information
+        document.getElementById("timeDifference").innerHTML = `
+            <strong>Total:</strong> ${totalTimeDiff}<br>
+            <strong>Between photos:</strong> ${timeDiffs.join(', ')}
+        `;
+        document.getElementById("timeInfo").style.display = 'block';
+    }
+
+    // Format time difference in human-readable format
+    function formatTimeDifference(date1, date2) {
+        const diffMs = Math.abs(date2 - date1);
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diffHrs = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+        let parts = [];
+        if (diffDays > 0) parts.push(`${diffDays} day${diffDays !== 1 ? 's' : ''}`);
+        if (diffHrs > 0) parts.push(`${diffHrs} hour${diffHrs !== 1 ? 's' : ''}`);
+        if (diffMins > 0) parts.push(`${diffMins} minute${diffMins !== 1 ? 's' : ''}`);
+        if (diffSecs > 0 && parts.length < 2) parts.push(`${diffSecs} second${diffSecs !== 1 ? 's' : ''}`);
+
+        return parts.join(' ') || 'less than a second';
+    }
+
     // Clear the map and reset all data
     function clearMap(resetInput = true) {
         // Clear markers and path
@@ -416,6 +488,7 @@
         // Reset UI elements
         document.getElementById("photoCards").innerHTML = '';
         document.getElementById("pathInfo").style.display = 'none';
+        document.getElementById("timeInfo").style.display = 'none';
         
         if (resetInput) {
             document.getElementById("imageInput").value = '';
@@ -425,82 +498,6 @@
         myMap.setView([11.635230398105993, 123.70790316297406], 5);
         
         console.log('Map cleared successfully');
-    }
-
-    // Helper function to format the EXIF date string
-    function formatDate(date) {
-        if (!date) return 'Unknown date';
-        
-        try {
-            const dateParts = date.split(" "); 
-            const dateFormatted = dateParts[0].replace(/:/g, '-'); 
-            const timeFormatted = dateParts[1];
-
-            const isoFormattedDate = `${dateFormatted}T${timeFormatted}`;
-            const formattedDate = new Date(isoFormattedDate);
-
-            if (isNaN(formattedDate.getTime())) {
-                return date; // Return original if can't parse
-            } else {
-                return formattedDate.toLocaleString('en-US', {
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric', 
-                    hour: 'numeric', 
-                    minute: 'numeric', 
-                    second: 'numeric', 
-                    hour12: true 
-                });
-            }
-        } catch (e) {
-            console.error('Error formatting date:', e);
-            return date; // Return original if error
-        }
-    }
-
-    // Fetch weather data for coordinates
-    async function fetchWeatherData(lat, lon) {
-        const apiKey = 'b32786b808e33a9e3d7051cd1a10ad6f';
-        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-
-        try {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-
-            if (data.cod === 200) {
-                const weatherDescription = capitalizeWords(data.weather[0].description);
-                const temperature = data.main.temp;
-                const humidity = data.main.humidity;
-                const windSpeed = data.wind.speed;
-                const locName = data.name;
-                const iconCode = data.weather[0].icon;
-
-                // Update weather info
-                document.getElementById("locData").textContent = locName || 'Unknown location';
-                document.getElementById("tempData").textContent = `${temperature} °C`;
-                document.getElementById("weatherData").textContent = weatherDescription;
-                document.getElementById("humData").textContent = `${humidity}%`;
-                document.getElementById("wind_speedData").textContent = `${windSpeed} m/s`;
-
-                // Set weather icon
-                const weatherIconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
-                document.getElementById("weatherIcon").src = weatherIconUrl;
-            } else {
-                console.error('Weather API error:', data.message);
-                document.getElementById("weatherData").textContent = 'Weather data unavailable';
-            }
-        } catch (error) {
-            console.error('Error fetching weather data:', error);
-            document.getElementById("weatherData").textContent = 'Error fetching weather';
-        }
-    }
-
-    // Helper to capitalize words
-    function capitalizeWords(str) {
-        return str.split(' ').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
     }
 
     // Initialize the application
