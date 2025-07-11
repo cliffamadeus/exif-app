@@ -86,12 +86,13 @@
             <div class="row">
                 <!-- Image and Input Section -->
                 <div class="col-md-4 image-section">
-                    <img id="imagePreview" class="image-preview" src="https://www.freeiconspng.com/uploads/no-image-icon-6.png" alt="Image Preview" />
-                    <input type="file" id="imageInput" style="margin-top:15px;" class="form-control" multiple accept="image/*" onchange="handleImageInput(this);" />
+                    <!-- 
+                        <img id="imagePreview" class="image-preview" src="https://www.freeiconspng.com/uploads/no-image-icon-6.png" alt="Image Preview" />
                     <div class="text-center mt-3">
                         <small id="dateTimeData">No date data</small>
                     </div>
-                    <button id="clearButton" class="btn btn-danger mt-3" type="button" onclick="clearMap()">Clear Map</button>
+                    -->
+                    <input type="file" id="imageInput" class="form-control" multiple accept="image/*" onchange="handleImageInput(this);" />
                     <div class="loading-spinner" id="loadingSpinner">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -109,7 +110,8 @@
                 </div>
                 <div class="col-md-8">
                      <!-- Map Section -->
-            <div id="map" class="mt-5"></div>
+                    <button id="clearButton" class="btn btn-danger mt-3" type="button" onclick="clearMap()">Clear Map</button>
+                    <div id="map" class="mt-5"></div>
                 </div>
 
                 <!-- Data Section 
