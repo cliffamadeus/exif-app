@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .main {
             width: 95%;
@@ -72,6 +73,8 @@
             display: none;
             margin-top: 10px;
         }
+
+        
     </style>
 </head>
 
@@ -92,7 +95,15 @@
                         <small id="dateTimeData">No date data</small>
                     </div>
                     -->
-                    <input type="file" id="imageInput" class="form-control" multiple accept="image/*" onchange="handleImageInput(this);" />
+                    
+                    <!-- Hidden file input -->
+                    <input type="file" id="imageInput" class="d-none" multiple accept="image/*" onchange="handleImageInput(this);" />
+
+                    <!-- Label styled as Bootstrap icon button -->
+                    <label for="imageInput" class="btn btn-primary">
+                        <i style="font-size: 3S0px;" class="bi bi-plus">Add Image</i>
+                    </label>
+
                     <div class="loading-spinner" id="loadingSpinner">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
