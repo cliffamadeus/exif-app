@@ -73,8 +73,18 @@
             display: none;
             margin-top: 10px;
         }
+        .fixed-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
 
-        
+        @media (min-width: 768px) {
+            .fixed-img {
+            height: 200px;
+            }
+        }
+                
     </style>
 </head>
 
@@ -89,13 +99,7 @@
             <div class="row">
                 <!-- Image and Input Section -->
                 <div class="col-md-4 image-section">
-                    <!-- 
-                        <img id="imagePreview" class="image-preview" src="https://www.freeiconspng.com/uploads/no-image-icon-6.png" alt="Image Preview" />
-                    <div class="text-center mt-3">
-                        <small id="dateTimeData">No date data</small>
-                    </div>
-                    -->
-                    
+
                     <!-- Hidden file input -->
                     <input type="file" id="imageInput" class="d-none" multiple accept="image/*" onchange="handleImageInput(this);" />
 
@@ -117,65 +121,14 @@
                         <strong>Time Between Photos:</strong> <span id="timeDifference">N/A</span>
                     </div>
                      <h5>Photo Gallery</h5>
-                    <div id="photoCards" class="row row-cols-1 row-cols-md-3 g-4"></div>
+                    <div id="photoCards" class="row row-cols-1"></div>
                 </div>
                 <div class="col-md-8">
                      <!-- Map Section -->
                     <button id="clearButton" class="btn btn-danger mt-3" type="button" onclick="clearMap()">Clear Map</button>
                     <div id="map" class="mt-5"></div>
                 </div>
-
-                <!-- Data Section 
-                <div class="col-md-8 data-section">
-                    <div class="row">
-                        <div class="col">
-                            <div class="row">
-                                <div class="col">
-                                    <strong>Latitude:</strong>
-                                    <p id="latitudeData">No GPS data</p>
-                                </div>
-                                <div class="col">
-                                    <strong>Longitude:</strong>
-                                    <p id="longitudeData">No GPS data</p>
-                                </div>
-                            </div>
-                            
-                            <h5>Photo Information</h5>
-                            <hr>
-                            <div class="row">
-                                <div class="col">
-                                    <strong>Filename:</strong>
-                                    <p id="filenameData">No file selected</p>
-                                </div>
-                                <div class="col">
-                                    <strong>Date Taken:</strong>
-                                    <p id="dateData">No date data</p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <strong>Camera Make:</strong>
-                                    <p id="makeData">No make data</p>
-                                </div>
-                                <div class="col">
-                                    <strong>Camera Model:</strong>
-                                    <p id="modelData">No model data</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-            -->
-
-            <!-- Photo Cards Section -->
-            <div class="row mt-3">
-                <div class="col-md-12">
-                   
-                </div>
-            </div>
-
-           
         </div>
     </div>
 </div>
@@ -331,14 +284,23 @@
             const card = document.createElement('div');
             card.className = 'col photo-card';
             card.innerHTML = `
-                <div class="card h-100" onclick="focusOnPhoto('${photo.id}')">
-                    <img src="${photo.src}" class="card-img-top" alt="${photo.filename}">
-                    <div class="card-body">
-                        <h6 class="card-title">${photo.filename}</h6>
-                        <p class="card-text small">
-                            <strong>Date:</strong> ${photo.formattedDate}<br>
-                            <strong>Location:</strong> ${photo.lat.toFixed(6)}, ${photo.lon.toFixed(6)}
-                        </p>
+                <div class="card h-100 w-100" onclick="focusOnPhoto('${photo.id}')">
+                    <div class="row g-0 align-items-center">
+                        <!-- Image Section (2/3 width) -->
+                        <div class="col-8">
+                        <img src="${photo.src}" class="fixed-img rounded-start" alt="${photo.filename}">
+                        </div>
+
+                        <!-- Info Section (1/3 width) -->
+                        <div class="col-4">
+                        <div class="card-body p-2">
+                            <h6 class="card-title mb-1 text-truncate">${photo.filename}</h6>
+                            <p class="card-text small mb-0">
+                            <strong>Date:</strong><br> ${photo.formattedDate}<br>
+                            <strong>Location:</strong><br> ${photo.lat.toFixed(6)}, ${photo.lon.toFixed(6)}
+                            </p>
+                        </div>
+                        </div>
                     </div>
                 </div>
             `;
