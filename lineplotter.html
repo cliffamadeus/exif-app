@@ -27,19 +27,15 @@
             text-align: center;
         }
         #photoCards {
-            max-height: 300px;
+            max-height: 500px;
             overflow-y: auto;
             margin-top: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
             padding: 10px;
         }
         .photo-card {
             cursor: pointer;
             margin-bottom: 10px;
             padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 5px;
             transition: all 0.2s;
         }
         .photo-card:hover {
@@ -90,7 +86,7 @@
 
 <body>
 <div class="main" style="margin-top: .25rem;">
-    <div class="card mb-4">
+    <div class="mb-4">
         <div class="card-header text-bg-light">
             <h5 class="card-title mb-0">EXIF Photo Plotter with Road Paths</h5>
         </div>
@@ -99,29 +95,36 @@
             <div class="row">
                 <!-- Image and Input Section -->
                 <div class="col-md-4 image-section">
-
-                    <!-- Hidden file input -->
-                    <input type="file" id="imageInput" class="d-none" multiple accept="image/*" onchange="handleImageInput(this);" />
-
-                    <!-- Label styled as Bootstrap icon button -->
-                    <label for="imageInput" class="btn btn-primary">
-                        <i style="font-size: 3S0px;" class="bi bi-plus">Add Image</i>
-                    </label>
-
-                    <div class="loading-spinner" id="loadingSpinner">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                    <div class="container text-center">
+                        <div class="row">
+                            <div class="col">
+                                <!-- Hidden file input -->
+                                <input type="file" id="imageInput" class="d-none" multiple accept="image/*" onchange="handleImageInput(this);" />
+                                <!-- Label styled as Bootstrap icon button -->
+                                <label for="imageInput" style="margin-top: 5rem;"class="btn btn-primary">
+                                    <i style="font-size: 3S0px;" class="bi bi-plus">Add Image</i>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <div class="loading-spinner" id="loadingSpinner">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span>Calculating road path...</span>
+                                </div>
+                                <div id="pathInfo" class="path-info mt-3" style="display: none;">
+                                    <strong>Total Distance:</strong> <span id="totalDistance">0 km</span>
+                                </div>
+                                <div id="timeInfo" class="time-info mt-3" style="display: none;">
+                                    <strong>Time Between Photos:</strong> <span id="timeDifference">N/A</span>
+                                </div>
+                            </div>
                         </div>
-                        <span>Calculating road path...</span>
                     </div>
-                    <div id="pathInfo" class="path-info mt-3" style="display: none;">
-                        <strong>Total Distance:</strong> <span id="totalDistance">0 km</span>
-                    </div>
-                    <div id="timeInfo" class="time-info mt-3" style="display: none;">
-                        <strong>Time Between Photos:</strong> <span id="timeDifference">N/A</span>
-                    </div>
-                     <h5>Photo Gallery</h5>
-                    <div id="photoCards" class="row row-cols-1"></div>
+                  
+                     
+                     <h5 style="margin-top: 1rem;">Photo Gallery</h5>
+                    <div id="photoCards"></div>
                 </div>
                 <div class="col-md-8">
                      <!-- Map Section -->
@@ -284,11 +287,15 @@
             const card = document.createElement('div');
             card.className = 'col photo-card';
             card.innerHTML = `
-                <div class="card h-100 w-100" onclick="focusOnPhoto('${photo.id}')">
+                <div class="h-100" onclick="focusOnPhoto('${photo.id}')">
                     <div class="row g-0 align-items-center">
                         <!-- Image Section (2/3 width) -->
                         <div class="col-8">
-                        <img src="${photo.src}" class="fixed-img rounded-start" alt="${photo.filename}">
+                        <img style="
+                                width: 200px;
+                                height: 100px;
+                                object-fit: cover;"
+                            src="${photo.src}" class="fixed-img rounded-start" alt="${photo.filename}">
                         </div>
 
                         <!-- Info Section (1/3 width) -->
@@ -302,7 +309,9 @@
                         </div>
                         </div>
                     </div>
+                    <hr>
                 </div>
+                
             `;
             cardsContainer.appendChild(card);
         });
