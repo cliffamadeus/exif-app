@@ -30,7 +30,7 @@
       }
 
       .applet-card {
-          width: 200px;
+          width: 400px;
           height: 150px;
           margin-bottom: 1rem;
           box-sizing: border-box;
@@ -38,7 +38,7 @@
 
       .applet-btn {
           position: absolute; 
-          bottom: 20px; 
+          bottom: 10px; 
           right: 20px;
       }
 
@@ -57,16 +57,6 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Applets
             </a>
-            <!--
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="./applet-1/">Applet 1</a></li>
-              <li><a class="dropdown-item" href="./applet-2/">Applet 2</a></li>
-              <li><a class="dropdown-item" href="./applet-3/">Applet 3</a></li>
-              <li><a class="dropdown-item" href="./applet-4/">Applet 4</a></li>
-              <li><a class="dropdown-item" href="./applet-5/">Applet 5</a></li>
-              <li><a class="dropdown-item" href="./applet-6/">Applet 6</a></li>
-            </ul>
-            -->
           </li>
           <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">Disabled</a>
@@ -81,7 +71,7 @@
 
     <h1 class="title" >EXIF Applets Library</h1>
     <br>
-    <form class="d-flex container" role="search">
+      <form class="d-flex container" role="search">
         <input class="form-control me-2" type="search" aria-label="Search" id="searchApplet" placeholder="Search applets...">
       </form>
     <div class="applet-flex-container"  id="applet-container">
@@ -89,70 +79,69 @@
     </div>
 
 <script>
-class AppletCard {
-    constructor(title, description, link) {
-        this.title = title;
-        this.description = description;
-        this.link = link;
+    class AppletCard {
+        constructor(title, description, link) {
+            this.title = title;
+            this.description = description;
+            this.link = link;
+        }
+
+        createCard() {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card applet-card';
+            cardDiv.innerHTML = `
+                <div class="card-body">
+                    <h6 class="card-title">${this.title}</h6>
+                    <p class="card-text">${this.description}</p>
+                    <a href="${this.link}" class="btn btn-primary applet-btn" style="">Go to Applet</a>
+                </div>
+            `;
+            return cardDiv;
+        }
     }
 
-    createCard() {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'card applet-card';
-        cardDiv.innerHTML = `
-            <div class="card-body">
-                <h6 class="card-title">${this.title}</h6>
-                <p class="card-text">${this.description}</p>
-                <a href="${this.link}" class="btn btn-primary applet-btn" style="">Go to Applet</a>
-            </div>
-        `;
-        return cardDiv;
-    }
-}
+    class AppletRenderer {
+        constructor(containerId,searchInputId) {
+            this.container = document.getElementById(containerId);
 
-class AppletRenderer {
-    constructor(containerId,searchInputId) {
-        this.container = document.getElementById(containerId);
+            this.searchInput = document.getElementById(searchInputId);
+            this.appletData = [];
+            this.filteredData = [];
+            this.searchInput.addEventListener('input',()=> this.filterApplets());
+        }
 
-        //
-        this.searchInput = document.getElementById(searchInputId);
-        this.appletData = [];
-        this.filteredData = [];
-        this.searchInput.addEventListener('input',()=> this.filterApplets());
-    }
+        fetchAppletData(url) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    this.appletData = data;
+                    this.filteredData = data;
+                    this.renderApplets(this.filteredData);
+                })
+                .catch(error => console.error('Error loading applet data:', error));
+        }
 
-    fetchAppletData(url) {
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                this.appletData = data;
-                this.filteredData = data;
-                this.renderApplets(this.filteredData);
-            })
-            .catch(error => console.error('Error loading applet data:', error));
-    }
+        renderApplets(data) {
+            this.container.innerHTML = '';
+            data.forEach(applet => {
+                const appletCard = new AppletCard(applet.title, applet.description, applet.link);
+                const cardElement = appletCard.createCard();
+                this.container.appendChild(cardElement);
+            });
+        }
 
-    renderApplets(data) {
-        this.container.innerHTML = '';
-        data.forEach(applet => {
-            const appletCard = new AppletCard(applet.title, applet.description, applet.link);
-            const cardElement = appletCard.createCard();
-            this.container.appendChild(cardElement);
-        });
+        filterApplets(){
+            const query = this.searchInput.value.toLowerCase();
+            this.filteredData = this.appletData.filter(applet =>
+                applet.title.toLowerCase().includes(query) ||
+                applet.description.toLowerCase().includes(query)
+            );
+            this.renderApplets(this.filteredData);
+        }
     }
 
-    filterApplets(){
-        const query = this.searchInput.value.toLowerCase();
-        this.filteredData = this.appletData.filter(applet =>
-            applet.title.toLowerCase().includes(query) ||
-            applet.description.toLowerCase().includes(query)
-        );
-        this.renderApplets(this.filteredData);
-    }
-}
-
-const appletRenderer = new AppletRenderer('applet-container','searchApplet');
-appletRenderer.fetchAppletData('applets.json');
+    const appletRenderer = new AppletRenderer('applet-container','searchApplet');
+    appletRenderer.fetchAppletData('applets.json');
 </script>
 </body>
 </html>
