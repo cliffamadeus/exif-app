@@ -1,4 +1,4 @@
-# Calculate Distance between two photos
+# EXIF App
 
 A Pen created on CodePen.io. Original URL: [https://codepen.io/hexedhorizon/pen/poYBYZQ](https://codepen.io/hexedhorizon/pen/poYBYZQ).
 
